@@ -1,0 +1,293 @@
+```html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Школьный тест 😎</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 700px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            border-radius: 25px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        #counter {
+            opacity: 0.8;
+            margin-bottom: 30px;
+        }
+
+        #question {
+            font-size: 25px;
+            margin-bottom: 40px;
+        }
+
+        .answers {
+            position: relative;
+            min-height: 150px;
+        }
+
+        button {
+            position: absolute;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        #answer1 {
+            left: 15%;
+            background: #ff6b6b;
+            color: white;
+        }
+
+        #answer2 {
+            right: 15%;
+            background: #51cf66;
+            color: white;
+        }
+
+        button:hover {
+            transform: scale(1.08);
+        }
+
+        #message {
+            font-size: 20px;
+            margin-top: 20px;
+            min-height: 30px;
+        }
+
+        #next {
+            display: none;
+            position: static;
+            margin: 20px auto 0;
+            background: white;
+            color: #5f3dc4;
+        }
+
+        .win {
+            display: none;
+        }
+
+        .win h2 {
+            font-size: 40px;
+        }
+
+        .restart {
+            position: static;
+            background: white;
+            color: #5f3dc4;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div id="game">
+
+        <h1>😂 Проверка знаний</h1>
+
+        <div id="counter">Вопрос 1 из 3</div>
+
+        <div id="question">
+            В нашей школе было мероприятие, мы получили 1 место?
+        </div>
+
+        <div class="answers">
+            <button id="answer1">Да</button>
+            <button id="answer2">Нет</button>
+        </div>
+
+        <div id="message"></div>
+
+        <button id="next">Следующий вопрос →</button>
+
+    </div>
+
+
+    <div class="win" id="win">
+
+        <h2>🎉 ПОБЕДА!</h2>
+
+        <p>Ты прошёл весь тест!</p>
+
+        <p>Теперь ты официально знаешь правду 😂</p>
+
+        <button class="restart" onclick="location.reload()">
+            🔄 Пройти ещё раз
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    const questions = [
+
+        {
+            question: "В нашей школе было мероприятие, мы получили 1 место?",
+            wrong: "Да",
+            correct: "Нет"
+        },
+
+        {
+            question: "Тогда какое место мы получили?",
+            wrong: "1 место",
+            correct: "2 место"
+        },
+
+        {
+            question: "Кто сделал этот сайт?",
+            wrong: "Алпамыс",
+            correct: "Ясин"
+        }
+
+    ];
+
+
+    let currentQuestion = 0;
+
+
+    const question = document.getElementById("question");
+    const answer1 = document.getElementById("answer1");
+    const answer2 = document.getElementById("answer2");
+    const message = document.getElementById("message");
+    const next = document.getElementById("next");
+    const counter = document.getElementById("counter");
+    const game = document.getElementById("game");
+    const win = document.getElementById("win");
+
+
+    // Загружаем вопрос
+    function loadQuestion() {
+
+        const q = questions[currentQuestion];
+
+        question.textContent = q.question;
+
+        answer1.textContent = q.wrong;
+        answer2.textContent = q.correct;
+
+        counter.textContent =
+            `Вопрос ${currentQuestion + 1} из ${questions.length}`;
+
+        message.textContent = "";
+
+        next.style.display = "none";
+
+        // Возвращаем кнопки на исходные места
+        answer1.style.left = "15%";
+        answer1.style.top = "0px";
+
+        answer2.style.right = "15%";
+        answer2.style.left = "auto";
+        answer2.style.top = "0px";
+    }
+
+
+    // 🏃 Неправильная кнопка убегает
+    answer1.addEventListener("mouseenter", function() {
+
+        const container = document.querySelector(".answers");
+
+        const maxX = container.clientWidth - answer1.offsetWidth;
+        const maxY = container.clientHeight - answer1.offsetHeight;
+
+        const randomX = Math.random() * maxX;
+        const randomY = Math.random() * maxY;
+
+        answer1.style.left = randomX + "px";
+        answer1.style.top = randomY + "px";
+
+        // Меняем текст второй кнопки
+        if (answer2.textContent === "Нет") {
+            answer2.textContent = "Да";
+        } else if (answer2.textContent === "Да") {
+            answer2.textContent = "Нет";
+        }
+
+    });
+
+
+    // Если каким-то образом нажали неправильную кнопку
+    answer1.addEventListener("click", function() {
+
+        message.textContent = "😂 Нет-нет! Это неправильный ответ!";
+    });
+
+
+    // Правильный ответ
+    answer2.addEventListener("click", function() {
+
+        message.textContent = "✅ Правильно!";
+
+        next.style.display = "block";
+
+        answer1.style.pointerEvents = "none";
+        answer2.style.pointerEvents = "none";
+    });
+
+
+    // Следующий вопрос
+    next.addEventListener("click", function() {
+
+        currentQuestion++;
+
+        if (currentQuestion >= questions.length) {
+
+            game.style.display = "none";
+            win.style.display = "block";
+
+        } else {
+
+            answer1.style.pointerEvents = "auto";
+            answer2.style.pointerEvents = "auto";
+
+            loadQuestion();
+        }
+
+    });
+
+
+    // Запуск
+    loadQuestion();
+
+</script>
+
+</body>
+</html>
+```
