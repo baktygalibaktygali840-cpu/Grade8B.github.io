@@ -35,7 +35,6 @@
 
         h1 {
             font-size: 36px;
-            margin-bottom: 10px;
         }
 
         #counter {
@@ -50,7 +49,7 @@
 
         .answers {
             position: relative;
-            min-height: 150px;
+            height: 180px;
         }
 
         button {
@@ -61,17 +60,15 @@
             font-size: 18px;
             font-weight: bold;
             cursor: pointer;
-            transition: 0.2s;
+            transition: left 0.05s, top 0.05s, transform 0.15s;
         }
 
         #answer1 {
-            left: 15%;
             background: #ff6b6b;
             color: white;
         }
 
         #answer2 {
-            right: 15%;
             background: #51cf66;
             color: white;
         }
@@ -117,17 +114,15 @@
 
     <div id="game">
 
-        <h1>😂 Проверка знаний</h1>
+        <h1>8Б класска</h1>
 
-        <div id="counter">Вопрос 1 из 3</div>
+        <div id="counter"></div>
 
-        <div id="question">
-            В нашей школе было мероприятие, мы получили 1 место?
-        </div>
+        <div id="question"></div>
 
         <div class="answers">
-            <button id="answer1">Да</button>
-            <button id="answer2">Нет</button>
+            <button id="answer1"></button>
+            <button id="answer2"></button>
         </div>
 
         <div id="message"></div>
@@ -136,14 +131,13 @@
 
     </div>
 
-
     <div class="win" id="win">
 
         <h2>🎉 ПОБЕДА!</h2>
 
         <p>Ты прошёл весь тест!</p>
 
-        <p>Теперь ты официально знаешь правду 😂</p>
+        <p> </p>
 
         <button class="restart" onclick="location.reload()">
             🔄 Пройти ещё раз
@@ -156,138 +150,261 @@
 
 <script>
 
-    const questions = [
+const questions = [
 
-        {
-            question: "В нашей школе было мероприятие, мы получили 1 место?",
-            wrong: "Да",
-            correct: "Нет"
-        },
+    {
+        question: "В нашей школе было мероприятие, мы получили 1 место?",
+        answers: [
+            { text: "Да", correct: false },
+            { text: "Нет", correct: true }
+        ]
+    },
 
-        {
-            question: "Тогда какое место мы получили?",
-            wrong: "1 место",
-            correct: "2 место"
-        },
+    {
+        question: "Тогда какое место мы получили?",
+        answers: [
+            { text: "1 место", correct: false },
+            { text: "2 место", correct: true }
+        ]
+    },
 
-        {
-            question: "Кто сделал этот сайт?",
-            wrong: "Алпамыс",
-            correct: "Ясин"
-        }
+    {
+        question: "Кто сделал этот сайт?",
+        answers: [
+            { text: "Алпамыс", correct: false },
+            { text: "Ясин", correct: true }
+        ]
+    }
 
-    ];
-
-
-    let currentQuestion = 0;
-
-
-    const question = document.getElementById("question");
-    const answer1 = document.getElementById("answer1");
-    const answer2 = document.getElementById("answer2");
-    const message = document.getElementById("message");
-    const next = document.getElementById("next");
-    const counter = document.getElementById("counter");
-    const game = document.getElementById("game");
-    const win = document.getElementById("win");
+];
 
 
-    // Загружаем вопрос
-    function loadQuestion() {
+let currentQuestion = 0;
 
-        const q = questions[currentQuestion];
 
-        question.textContent = q.question;
+// Получаем элементы
+const question = document.getElementById("question");
+const answer1 = document.getElementById("answer1");
+const answer2 = document.getElementById("answer2");
+const message = document.getElementById("message");
+const next = document.getElementById("next");
+const counter = document.getElementById("counter");
+const game = document.getElementById("game");
+const win = document.getElementById("win");
 
-        answer1.textContent = q.wrong;
-        answer2.textContent = q.correct;
 
-        counter.textContent =
-            `Вопрос ${currentQuestion + 1} из ${questions.length}`;
+// Здесь запоминаем, какая кнопка неправильная
+let wrongButton;
 
-        message.textContent = "";
 
-        next.style.display = "none";
+// 🔀 Перемешивание массива
+function shuffle(array) {
 
-        // Возвращаем кнопки на исходные места
-        answer1.style.left = "15%";
-        answer1.style.top = "0px";
+    for (let i = array.length - 1; i > 0; i--) {
 
-        answer2.style.right = "15%";
-        answer2.style.left = "auto";
-        answer2.style.top = "0px";
+        const j = Math.floor(Math.random() * (i + 1));
+
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+
+    return array;
+}
+
+
+// Загружаем вопрос
+function loadQuestion() {
+
+    const q = questions[currentQuestion];
+
+    question.textContent = q.question;
+
+    counter.textContent =
+        `Вопрос ${currentQuestion + 1} из ${questions.length}`;
+
+    message.textContent = "";
+
+    next.style.display = "none";
+
+
+    // 🔀 Перемешиваем ответы
+    const answers = shuffle([...q.answers]);
+
+
+    answer1.textContent = answers[0].text;
+    answer2.textContent = answers[1].text;
+
+
+    // Определяем неправильную кнопку
+    if (answers[0].correct) {
+        answer1.dataset.correct = "true";
+        answer2.dataset.correct = "false";
+    } else {
+        answer1.dataset.correct = "false";
+        answer2.dataset.correct = "true";
     }
 
 
-    // 🏃 Неправильная кнопка убегает
-    answer1.addEventListener("mouseenter", function() {
+    // Возвращаем кнопки
+    answer1.style.left = "15%";
+    answer1.style.top = "0px";
 
-        const container = document.querySelector(".answers");
-
-        const maxX = container.clientWidth - answer1.offsetWidth;
-        const maxY = container.clientHeight - answer1.offsetHeight;
-
-        const randomX = Math.random() * maxX;
-        const randomY = Math.random() * maxY;
-
-        answer1.style.left = randomX + "px";
-        answer1.style.top = randomY + "px";
-
-        // Меняем текст второй кнопки
-        if (answer2.textContent === "Нет") {
-            answer2.textContent = "Да";
-        } else if (answer2.textContent === "Да") {
-            answer2.textContent = "Нет";
-        }
-
-    });
+    answer2.style.left = "auto";
+    answer2.style.right = "15%";
+    answer2.style.top = "0px";
 
 
-    // Если каким-то образом нажали неправильную кнопку
-    answer1.addEventListener("click", function() {
-
-        message.textContent = "😂 Нет-нет! Это неправильный ответ!";
-    });
+    answer1.style.pointerEvents = "auto";
+    answer2.style.pointerEvents = "auto";
 
 
-    // Правильный ответ
-    answer2.addEventListener("click", function() {
+    // Определяем неправильную кнопку
+    wrongButton =
+        answer1.dataset.correct === "false"
+        ? answer1
+        : answer2;
+}
+
+
+// 🏃‍♂️ СУПЕР-БЫСТРОЕ УБЕГАНИЕ
+function runAway(button) {
+
+    const container = document.querySelector(".answers");
+
+    const maxX = container.clientWidth - button.offsetWidth;
+    const maxY = container.clientHeight - button.offsetHeight;
+
+
+    // Очень быстро выбираем новое место
+    const randomX = Math.random() * maxX;
+    const randomY = Math.random() * maxY;
+
+
+    button.style.left = randomX + "px";
+    button.style.top = randomY + "px";
+
+
+    // Дополнительное изменение текста
+    const currentText = button.textContent;
+
+    if (currentText === "Да") {
+        button.textContent = "Нет";
+    }
+    else if (currentText === "Нет") {
+        button.textContent = "Да";
+    }
+}
+
+
+// 🏃 Реагируем ещё до наведения
+answer1.addEventListener("mouseenter", function() {
+
+    if (answer1 === wrongButton) {
+        runAway(answer1);
+    }
+
+});
+
+
+answer2.addEventListener("mouseenter", function() {
+
+    if (answer2 === wrongButton) {
+        runAway(answer2);
+    }
+
+});
+
+
+// 🏃‍♂️ Дополнительная защита:
+// если мышь приближается к неправильной кнопке,
+// она снова убегает
+document.addEventListener("mousemove", function(event) {
+
+    if (!wrongButton) return;
+
+    const rect = wrongButton.getBoundingClientRect();
+
+    const distanceX =
+        event.clientX - (rect.left + rect.width / 2);
+
+    const distanceY =
+        event.clientY - (rect.top + rect.height / 2);
+
+    const distance =
+        Math.sqrt(distanceX * distanceX + distanceY * distanceY);
+
+
+    // Если курсор близко — убегаем
+    if (distance < 90) {
+
+        runAway(wrongButton);
+
+    }
+
+});
+
+
+// Проверка ответа
+function checkAnswer(button) {
+
+    const correct =
+        button.dataset.correct === "true";
+
+
+    if (correct) {
 
         message.textContent = "✅ Правильно!";
 
-        next.style.display = "block";
-
         answer1.style.pointerEvents = "none";
         answer2.style.pointerEvents = "none";
-    });
+
+        next.style.display = "block";
+
+    } else {
+
+        message.textContent =
+            "😂 ХА! Этот ответ неправильный!";
+
+        runAway(button);
+    }
+}
 
 
-    // Следующий вопрос
-    next.addEventListener("click", function() {
-
-        currentQuestion++;
-
-        if (currentQuestion >= questions.length) {
-
-            game.style.display = "none";
-            win.style.display = "block";
-
-        } else {
-
-            answer1.style.pointerEvents = "auto";
-            answer2.style.pointerEvents = "auto";
-
-            loadQuestion();
-        }
-
-    });
+answer1.addEventListener("click", function() {
+    checkAnswer(answer1);
+});
 
 
-    // Запуск
-    loadQuestion();
+answer2.addEventListener("click", function() {
+    checkAnswer(answer2);
+});
+
+
+// Следующий вопрос
+next.addEventListener("click", function() {
+
+    currentQuestion++;
+
+
+    if (currentQuestion >= questions.length) {
+
+        game.style.display = "none";
+        win.style.display = "block";
+
+    } else {
+
+        loadQuestion();
+
+    }
+
+});
+
+
+// Запускаем первый вопрос
+loadQuestion();
 
 </script>
 
 </body>
 </html>
 ```
+
